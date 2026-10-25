@@ -39,10 +39,10 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-teal-50 text-slate-800">
       <Sidebar nav={nav} current={current.id} onSelect={setPage} user={user} onSignOut={signOut} />
-      <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+        <header className="z-20 flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
           <h1 className="text-lg font-semibold text-slate-900">{current.label}</h1>
           <div className="flex items-center gap-3 md:hidden">
             <select aria-label="Navigate to page" value={current.id} onChange={(e) => setPage(e.target.value)} className="max-w-[10rem] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm">{nav.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}</select>
@@ -50,7 +50,7 @@ export default function App() {
           </div>
           <p className="hidden text-sm text-slate-500 md:block">{user.name} · {user.role}</p>
         </header>
-        <main className="min-w-0 p-3 sm:p-6">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain p-3 sm:p-6">
           {current.id === "dashboard" && <Dashboard products={products} sales={sales} />}
           {current.id === "sales" && <Sales products={products} sales={sales} user={user} onComplete={completeSale} />}
           {current.id === "products" && <Products products={products} setProducts={setProducts} />}

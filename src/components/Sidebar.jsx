@@ -2,7 +2,7 @@ import { Store, LogOut } from "lucide-react";
 
 export default function Sidebar({ nav, current, onSelect, user, onSignOut }) {
   return (
-    <aside className="hidden w-64 flex-shrink-0 flex-col bg-gradient-to-b from-teal-950 via-teal-900 to-emerald-950 text-teal-50 md:flex">
+    <aside className="hidden h-full w-64 flex-shrink-0 flex-col overflow-y-auto bg-gradient-to-b from-teal-950 via-teal-900 to-emerald-950 text-teal-50 md:flex">
       <div className="flex items-center gap-3 px-5 py-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-emerald-400 text-teal-950"><Store size={19} /></div>
         <span className="text-sm font-semibold leading-tight">Retail Management System</span>

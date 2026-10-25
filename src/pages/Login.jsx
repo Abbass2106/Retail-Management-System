@@ -39,5 +39,3 @@ export default function Login({ users, onLogin }) {
     </div>
   );
 }
-git init
-git branch -M main

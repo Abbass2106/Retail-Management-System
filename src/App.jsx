@@ -32,12 +32,6 @@ export default function App() {
     setProducts((l) => l.map((p) => { const i = cart.find((c) => c.id === p.id); return i ? { ...p, qty: p.qty - i.qty } : p; }));
     return sale;
   };
-  const refundSale = (id) => {
-    const s = sales.find((x) => x.id === id);
-    setSales(sales.map((x) => (x.id === id ? { ...x, status: "Refunded" } : x)));
-    setProducts((l) => l.map((p) => { const i = s.items.find((c) => c.id === p.id); return i ? { ...p, qty: p.qty + i.qty } : p; }));
-    setLog((l) => [...s.items.map((i) => ({ date: dayStr(0), name: i.name, type: "Refund", qty: i.qty, note: id })), ...l]);
-  };
   const moveStock = (id, qty, type, note) => {
     const p = products.find((x) => x.id === id);
     setProducts(products.map((x) => (x.id === id ? { ...x, qty: Math.max(0, x.qty + qty) } : x)));
@@ -56,12 +50,12 @@ export default function App() {
           </div>
           <p className="hidden text-sm text-slate-500 md:block">{user.name} · {user.role}</p>
         </header>
-        <main className="p-4 sm:p-6">
+        <main className="min-w-0 p-3 sm:p-6">
           {current.id === "dashboard" && <Dashboard products={products} sales={sales} />}
           {current.id === "sales" && <Sales products={products} sales={sales} user={user} onComplete={completeSale} />}
           {current.id === "products" && <Products products={products} setProducts={setProducts} />}
           {current.id === "inventory" && <Inventory products={products} log={log} onStock={moveStock} />}
-          {current.id === "reports" && <Reports products={products} sales={sales} onRefund={refundSale} />}
+          {current.id === "reports" && <Reports products={products} sales={sales} />}
           {current.id === "users" && <Users users={users} setUsers={setUsers} />}
         </main>
       </div>

@@ -24,7 +24,7 @@ export default function Products({ products, setProducts }) {
           <form onSubmit={save} className="space-y-3">
             <Field label="Name"><input name="name" required className={inp} defaultValue={edit.name} /></Field>
             <Field label="Category"><input name="category" required list="cats" className={inp} defaultValue={edit.category} /><datalist id="cats">{cats.map((c) => <option key={c} value={c} />)}</datalist></Field>
-            <div className="grid grid-cols-2 gap-3"><Field label="Selling price"><input name="price" type="number" min="0" required className={inp} defaultValue={edit.price} /></Field><Field label="Cost price"><input name="cost" type="number" min="0" required className={inp} defaultValue={edit.cost} /></Field>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label="Selling price"><input name="price" type="number" min="0" required className={inp} defaultValue={edit.price} /></Field><Field label="Cost price"><input name="cost" type="number" min="0" required className={inp} defaultValue={edit.cost} /></Field>
               {!edit.id && <Field label="Opening quantity"><input name="qty" type="number" min="0" required className={inp} defaultValue={0} /></Field>}<Field label="Minimum stock level"><input name="min" type="number" min="0" required className={inp} defaultValue={edit.min} /></Field></div>
             <Btn className="w-full">Save product</Btn>
           </form>
@@ -32,4 +32,3 @@ export default function Products({ products, setProducts }) {
     </Card>
   );
 }
-

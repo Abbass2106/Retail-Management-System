@@ -34,11 +34,11 @@ export default function Sales({ products, sales, user, onComplete }) {
         <Card title="Current sale" className="h-fit lg:col-span-2">
           {cart.length === 0 ? <p className="text-sm text-slate-500">The cart is empty. Select products to start a sale.</p> : (
             <ul className="divide-y divide-slate-100">{cart.map((i) => (
-              <li key={i.id} className="flex items-center gap-3 py-3 text-sm">
-                <div className="flex-1"><p className="font-medium text-slate-800">{i.name}</p><p className="text-xs text-slate-500">{fmt(i.price)} each</p></div>
+              <li key={i.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 text-sm sm:flex">
+                <div className="min-w-0"><p className="break-words font-medium text-slate-800">{i.name}</p><p className="text-xs text-slate-500">{fmt(i.price)} each</p></div>
+                <button aria-label="Remove" onClick={() => setCart(cart.filter((x) => x.id !== i.id))} className="justify-self-end text-slate-400 hover:text-red-600 sm:order-last"><Trash2 size={15} /></button>
                 <div className="flex items-center gap-1"><button aria-label="Decrease" onClick={() => chg(i.id, -1)} className="rounded border border-slate-300 p-1 hover:bg-slate-50"><Minus size={13} /></button><span className="w-7 text-center">{i.qty}</span><button aria-label="Increase" onClick={() => chg(i.id, 1)} className="rounded border border-slate-300 p-1 hover:bg-slate-50"><Plus size={13} /></button></div>
-                <span className="w-24 text-right font-medium">{fmt(i.qty * i.price)}</span>
-                <button aria-label="Remove" onClick={() => setCart(cart.filter((x) => x.id !== i.id))} className="text-slate-400 hover:text-red-600"><Trash2 size={15} /></button>
+                <span className="w-24 text-right font-medium sm:ml-auto">{fmt(i.qty * i.price)}</span>
               </li>))}</ul>)}
           <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4"><span className="text-sm text-slate-600">Total</span><span className="text-xl font-semibold text-slate-900">{fmt(total)}</span></div>
           <p className="mb-2 mt-5 text-sm font-medium text-slate-700">Payment method</p>

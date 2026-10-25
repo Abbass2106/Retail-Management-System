@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
-import { Download, Undo2 } from "lucide-react";
+import { Download } from "lucide-react";
 import { Card, Btn, Badge, Stat, Table, Th, Td } from "../components/ui";
 import { PAY, fmt, dayStr } from "../data";
 import { bestSellers, profit, revenue } from "../utils";
 
-export default function Reports({ products, sales, onRefund }) {
+export default function Reports({ products, sales }) {
   const [days, setDays] = useState(7);
   const from = dayStr(days - 1);
   const inRange = useMemo(() => sales.filter((s) => s.date >= from), [sales, from]);
@@ -29,12 +29,10 @@ export default function Reports({ products, sales, onRefund }) {
       </div>
       <Card title="Inventory & low-stock report"><p className="mb-3 text-sm text-slate-600">Stock value at cost: <b>{fmt(products.reduce((t, p) => t + p.qty * p.cost, 0))}</b> · Low-stock items: <b>{products.filter((p) => p.qty <= p.min).map((p) => p.name).join(", ") || "None"}</b></p></Card>
       <Card title="Transactions">
-        <Table head={<><Th>Transaction</Th><Th>Date</Th><Th>Payment</Th><Th>Status</Th><Th right>Total</Th><Th /></>}>
-          {[...inRange].reverse().map((s) => (<tr key={s.id}><Td>{s.id}</Td><Td>{s.date}</Td><Td>{s.method}</Td><Td><Badge tone={s.status === "Completed" ? "green" : "red"}>{s.status}</Badge></Td><Td right>{fmt(s.total)}</Td>
-            <Td right>{s.status === "Completed" && <Btn kind="danger" onClick={() => window.confirm(`Refund ${s.id}? Stock will be restored.`) && onRefund(s.id)}><Undo2 size={14} />Refund</Btn>}</Td></tr>))}
+        <Table head={<><Th>Transaction</Th><Th>Date</Th><Th>Payment</Th><Th>Status</Th><Th right>Total</Th></>}>
+          {[...inRange].reverse().map((s) => (<tr key={s.id}><Td>{s.id}</Td><Td>{s.date}</Td><Td>{s.method}</Td><Td><Badge tone={s.status === "Completed" ? "green" : "red"}>{s.status}</Badge></Td><Td right>{fmt(s.total)}</Td></tr>))}
         </Table>
       </Card>
     </div>
   );
 }
-

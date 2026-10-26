@@ -5,16 +5,21 @@ import { PAY, fmt } from "../data";
 import Receipt from "./Receipt";
 
 export default function Sales({ products, sales, user, onComplete }) {
-  const [q, setQ] = useState(""); const [cart, setCart] = useState([]); const [method, setMethod] = useState(""); const [ref, setRef] = useState(""); const [receipt, setReceipt] = useState(null);
+  const [q, setQ] = useState(""); const [cart, setCart] = useState([]); const [method, setMethod] = useState(""); const [ref, setRef] = useState(""); const [saleDiscount, setSaleDiscount] = useState(""); const [receipt, setReceipt] = useState(null);
   const list = products.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()) || p.category.toLowerCase().includes(q.toLowerCase()));
   const stockOf = (id) => products.find((p) => p.id === id).qty;
-  const add = (p) => setCart((c) => { const e = c.find((i) => i.id === p.id); if (e) return e.qty < p.qty ? c.map((i) => (i.id === p.id ? { ...i, qty: i.qty + 1 } : i)) : c; return p.qty > 0 ? [...c, { id: p.id, name: p.name, price: p.price, cost: p.cost, qty: 1 }] : c; });
+  const add = (p) => setCart((c) => { const e = c.find((i) => i.id === p.id); if (e) return e.qty < p.qty ? c.map((i) => (i.id === p.id ? { ...i, qty: i.qty + 1 } : i)) : c; return p.qty > 0 ? [...c, { id: p.id, name: p.name, price: p.price, cost: p.cost, qty: 1, discount: 0 }] : c; });
   const chg = (id, d) => setCart((c) => c.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(stockOf(id), i.qty + d)) } : i)));
-  const total = cart.reduce((s, i) => s + i.qty * i.price, 0);
+  const subtotal = cart.reduce((s, i) => s + i.qty * i.price, 0);
+  const itemDiscount = cart.reduce((s, i) => s + i.qty * Math.min(i.price, Math.max(0, Number(i.discount) || 0)), 0);
+  const discountedSubtotal = subtotal - itemDiscount;
+  const appliedSaleDiscount = Math.min(discountedSubtotal, Math.max(0, Number(saleDiscount) || 0));
+  const totalDiscount = itemDiscount + appliedSaleDiscount;
+  const total = subtotal - totalDiscount;
   const recentSales = [...sales].reverse().filter((sale) => sale.cashier === user.name).slice(0, 10);
   const complete = () => {
-    const sale = onComplete(cart, method, ref, user);
-    setReceipt(sale); setCart([]); setMethod(""); setRef("");
+    const sale = onComplete(cart, method, ref, user, { subtotal, itemDiscount, saleDiscount: appliedSaleDiscount, total });
+    setReceipt(sale); setCart([]); setMethod(""); setRef(""); setSaleDiscount("");
   };
   return (
     <div className="space-y-6">
@@ -34,13 +39,25 @@ export default function Sales({ products, sales, user, onComplete }) {
         <Card title="Current sale" className="h-fit lg:col-span-2">
           {cart.length === 0 ? <p className="text-sm text-slate-500">The cart is empty. Select products to start a sale.</p> : (
             <ul className="divide-y divide-slate-100">{cart.map((i) => (
-              <li key={i.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 text-sm sm:flex">
+              <li key={i.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 text-sm">
                 <div className="min-w-0"><p className="break-words font-medium text-slate-800">{i.name}</p><p className="text-xs text-slate-500">{fmt(i.price)} each</p></div>
-                <button aria-label="Remove" onClick={() => setCart(cart.filter((x) => x.id !== i.id))} className="justify-self-end text-slate-400 hover:text-red-600 sm:order-last"><Trash2 size={15} /></button>
-                <div className="flex items-center gap-1"><button aria-label="Decrease" onClick={() => chg(i.id, -1)} className="rounded border border-slate-300 p-1 hover:bg-slate-50"><Minus size={13} /></button><span className="w-7 text-center">{i.qty}</span><button aria-label="Increase" onClick={() => chg(i.id, 1)} className="rounded border border-slate-300 p-1 hover:bg-slate-50"><Plus size={13} /></button></div>
-                <span className="w-24 text-right font-medium sm:ml-auto">{fmt(i.qty * i.price)}</span>
+                <button aria-label={`Remove ${i.name}`} onClick={() => setCart(cart.filter((x) => x.id !== i.id))} className="justify-self-end text-slate-400 hover:text-red-600"><Trash2 size={15} /></button>
+                <div className="flex items-center gap-1"><button aria-label={`Decrease ${i.name} quantity`} onClick={() => chg(i.id, -1)} className="rounded border border-slate-300 p-1 hover:bg-slate-50"><Minus size={13} /></button><span className="w-7 text-center">{i.qty}</span><button aria-label={`Increase ${i.name} quantity`} onClick={() => chg(i.id, 1)} className="rounded border border-slate-300 p-1 hover:bg-slate-50"><Plus size={13} /></button></div>
+                <span className="text-right font-medium">{fmt(i.qty * (i.price - Math.min(i.price, Math.max(0, Number(i.discount) || 0))))}</span>
+                <label className="col-span-2 flex items-center justify-between gap-3 text-xs text-slate-600">
+                  <span>Discount per item (TSh)</span>
+                  <input type="number" min="0" max={i.price} step="1" aria-label={`Discount per ${i.name}`} className={inp + " w-32"} value={i.discount} onChange={(e) => setCart((items) => items.map((item) => item.id === i.id ? { ...item, discount: Math.min(i.price, Math.max(0, Number(e.target.value) || 0)) } : item))} />
+                </label>
               </li>))}</ul>)}
-          <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4"><span className="text-sm text-slate-600">Total</span><span className="text-xl font-semibold text-slate-900">{fmt(total)}</span></div>
+          <div className="mt-4 space-y-2 border-t border-slate-200 pt-4 text-sm">
+            <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{fmt(subtotal)}</span></div>
+            <div className="flex justify-between text-emerald-700"><span>Item discounts</span><span>−{fmt(itemDiscount)}</span></div>
+            <label className="flex items-center justify-between gap-3 text-slate-700">
+              <span>Sale discount (TSh)</span>
+              <input type="number" min="0" max={discountedSubtotal} step="1" aria-label="Sale discount in TSh" className={inp + " w-32"} value={saleDiscount} onChange={(e) => setSaleDiscount(e.target.value)} />
+            </label>
+            <div className="flex justify-between border-t border-slate-100 pt-2 text-lg font-semibold text-slate-900"><span>Total</span><span>{fmt(total)}</span></div>
+          </div>
           <p className="mb-2 mt-5 text-sm font-medium text-slate-700">Payment method</p>
           <div className="grid grid-cols-2 gap-2">{PAY.map((m) => (
             <button key={m} onClick={() => setMethod(m)} className={`rounded-md border px-3 py-2 text-sm transition focus:outline-none focus:ring-2 focus:ring-teal-500 ${method === m ? "border-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 font-medium text-teal-900" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>{m}</button>

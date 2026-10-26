@@ -12,7 +12,7 @@ export default function Reports({ products, sales }) {
   const byPay = PAY.map((m) => [m, done.filter((s) => s.method === m).reduce((t, s) => t + s.total, 0)]);
   const maxPay = Math.max(...byPay.map((x) => x[1]), 1);
   const exportCsv = () => {
-    const rows = [["Transaction", "Date", "Payment", "Cashier", "Total", "Status"], ...inRange.map((s) => [s.id, s.date, s.method, s.cashier, s.total, s.status])];
+    const rows = [["Transaction", "Date", "Payment", "Cashier", "Subtotal", "Discount", "Total", "Status"], ...inRange.map((s) => [s.id, s.date, s.method, s.cashier, s.subtotal ?? s.total + (s.discount || 0), s.discount || 0, s.total, s.status])];
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([rows.map((r) => r.join(",")).join("\n")], { type: "text/csv" })); a.download = "sales-report.csv"; a.click();
   };
   return (
@@ -29,8 +29,8 @@ export default function Reports({ products, sales }) {
       </div>
       <Card title="Inventory & low-stock report"><p className="mb-3 text-sm text-slate-600">Stock value at cost: <b>{fmt(products.reduce((t, p) => t + p.qty * p.cost, 0))}</b> · Low-stock items: <b>{products.filter((p) => p.qty <= p.min).map((p) => p.name).join(", ") || "None"}</b></p></Card>
       <Card title="Transactions">
-        <Table head={<><Th>Transaction</Th><Th>Date</Th><Th>Payment</Th><Th>Status</Th><Th right>Total</Th></>}>
-          {[...inRange].reverse().map((s) => (<tr key={s.id}><Td>{s.id}</Td><Td>{s.date}</Td><Td>{s.method}</Td><Td><Badge tone={s.status === "Completed" ? "green" : "red"}>{s.status}</Badge></Td><Td right>{fmt(s.total)}</Td></tr>))}
+        <Table head={<><Th>Transaction</Th><Th>Date</Th><Th>Payment</Th><Th>Status</Th><Th right>Discount</Th><Th right>Total</Th></>}>
+          {[...inRange].reverse().map((s) => (<tr key={s.id}><Td>{s.id}</Td><Td>{s.date}</Td><Td>{s.method}</Td><Td><Badge tone={s.status === "Completed" ? "green" : "red"}>{s.status}</Badge></Td><Td right>{fmt(s.discount || 0)}</Td><Td right>{fmt(s.total)}</Td></tr>))}
         </Table>
       </Card>
     </div>

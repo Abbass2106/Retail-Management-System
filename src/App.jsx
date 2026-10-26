@@ -26,8 +26,8 @@ export default function App() {
   const nav = NAV.filter((n) => n.roles.includes(user.role));
   const current = nav.find((n) => n.id === page) || nav[0];
 
-  const completeSale = (cart, method, ref, u) => {
-    const sale = { id: "TRX-" + (1001 + sales.length), date: dayStr(0), time: new Date().toTimeString().slice(0, 5), items: cart, total: cart.reduce((s, i) => s + i.qty * i.price, 0), method, ref, cashier: u.name, status: "Completed" };
+  const completeSale = (cart, method, ref, u, totals) => {
+    const sale = { id: "TRX-" + (1001 + sales.length), date: dayStr(0), time: new Date().toTimeString().slice(0, 5), items: cart, ...totals, discount: totals.itemDiscount + totals.saleDiscount, method, ref, cashier: u.name, status: "Completed" };
     setSales((s) => [...s, sale]);
     setProducts((l) => l.map((p) => { const i = cart.find((c) => c.id === p.id); return i ? { ...p, qty: p.qty - i.qty } : p; }));
     return sale;

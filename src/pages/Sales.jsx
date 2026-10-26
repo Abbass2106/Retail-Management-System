@@ -16,7 +16,8 @@ export default function Sales({ products, sales, user, onComplete }) {
   const appliedSaleDiscount = Math.min(discountedSubtotal, Math.max(0, Number(saleDiscount) || 0));
   const totalDiscount = itemDiscount + appliedSaleDiscount;
   const total = subtotal - totalDiscount;
-  const recentSales = [...sales].reverse().filter((sale) => sale.cashier === user.name).slice(0, 10);
+  const visibleSales = user.role === "Manager" ? sales : sales.filter((sale) => sale.cashier === user.name);
+  const recentSales = [...visibleSales].reverse().slice(0, 10);
   const complete = () => {
     const sale = onComplete(cart, method, ref, user, { subtotal, itemDiscount, saleDiscount: appliedSaleDiscount, total });
     setReceipt(sale); setCart([]); setMethod(""); setRef(""); setSaleDiscount("");
@@ -68,7 +69,7 @@ export default function Sales({ products, sales, user, onComplete }) {
         </Card>
       </div>
       <Card title="Recent transactions">
-        {recentSales.length === 0 ? <p className="text-sm text-slate-500">No transactions have been recorded by you yet. Completed sales will appear here.</p> : (
+        {recentSales.length === 0 ? <p className="text-sm text-slate-500">{user.role === "Manager" ? "No transactions have been recorded yet." : "No transactions have been recorded by you yet."} Completed sales will appear here.</p> : (
           <Table head={<><Th>Transaction</Th><Th>Date &amp; time</Th><Th>Payment</Th><Th>Status</Th><Th right>Total</Th></>}>
             {recentSales.map((sale) => (
               <tr key={sale.id}>
